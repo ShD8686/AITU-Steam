@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>AITU Steam Store Final</title>
+    <style>
+        :root {
+            --steam-dark: #1b2838;
+            --steam-blue: #171a21;
+            --steam-light-blue: #66c0f4;
+            --steam-green: #4c6b22;
+            --steam-text: #c7d5e0;
+        }
+        body { font-family: 'Arial', sans-serif; background: var(--steam-blue); color: var(--steam-text); margin: 0; padding: 0; }
+        .header { background: var(--steam-dark); padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--steam-light-blue); }
+        .container { max-width: 1000px; margin: 20px auto; padding: 20px; }
+        .hidden { display: none !important; }
+        
+        /* Кнопки */
+        button { background: #2a475e; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 2px; transition: 0.2s; }
+        button:hover { background: var(--steam-light-blue); color: black; }
+        .btn-buy { background: var(--steam-green); font-weight: bold; }
+        
+        /* Сетка игр */
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .game-card { background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 15px; border-radius: 4px; position: relative; }
+        .price-tag { color: var(--steam-light-blue); font-size: 1.2em; font-weight: bold; margin: 10px 0; }
+        .genre-badge { background: rgba(103,193,245,0.1); color:#66c0f4; padding:2px 6px; border-radius:2px; font-size:10px; margin-right:4px; border:1px solid #66c0f4; text-transform: uppercase; }
+
+        /* Админка (исправленная) */
+        .admin-panel { background: #222; padding: 20px; border: 1px dashed #555; margin-bottom: 30px; }
+        .admin-panel input, .admin-panel select, .admin-panel textarea { 
+            display: block; width: 100%; margin-bottom: 10px; background: #32353c; border: 1px solid #000; color: white; padding: 10px; box-sizing: border-box; 
+        }
+        
+        .nav-tabs { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .wallet-display { background: var(--steam-green); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        
+        /* Профиль и Детали */
+        .profile-card { background: var(--steam-dark); padding: 30px; border-radius: 4px; border: 1px solid #333; }
+        .detail-view { background: #1b2838; padding: 40px; border: 1px solid var(--steam-light-blue); }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1 style="margin:0; color: white;">AITU <span style="color: var(--steam-light-blue);">STEAM</span></h1>
+    <div id="userControls" class="hidden" style="display:flex; align-items:center; gap:15px;">
+        <div id="walletBal" class="wallet-display">$0.00</div>
+        <span id="userEmailDisplay" style="color:white; font-weight:bold;"></span> 
+        <button onclick="logout()" style="background:#555; font-size:12px;">LOGOUT</button>
+    </div>
+</div>
+
+<div class="container">
+    <!-- AUTH -->
+    <div id="authSection" class="auth-box" style="text-align:center; background:var(--steam-dark); padding:40px; border-radius:5px; width:350px; margin: 100px auto;">
+        <div id="loginForm">
+            <h2>LOGIN</h2>
+            <input type="email" id="loginEmail" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:#32353c; color:white; border:1px solid #000;">
+            <input type="password" id="loginPassword" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px; background:#32353c; color:white; border:1px solid #000;">
+            <button onclick="handleLogin()" style="width:100%">Sign In</button>
+            <p onclick="toggleAuth(true)" style="cursor:pointer; font-size:12px; margin-top:15px; text-decoration:underline;">Create new account</p>
+        </div>
+        <div id="registerForm" class="hidden">
+            <h2>REGISTER</h2>
+            <input type="email" id="regEmail" placeholder="Email (admin for rights)" style="width:100%; padding:10px; margin-bottom:10px; background:#32353c; color:white; border:1px solid #000;">
+            <input type="password" id="regPassword" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px; background:#32353c; color:white; border:1px solid #000;">
+            <button onclick="handleRegister()" style="width:100%">Register</button>
+            <p onclick="toggleAuth(false)" style="cursor:pointer; font-size:12px; margin-top:15px; text-decoration:underline;">Back to login</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="mainSection" class="hidden">
+        <div class="nav-tabs">
+            <button onclick="loadStore()">STORE</button>
+            <button onclick="loadLibrary()">LIBRARY</button>
+            <button onclick="loadCart()">CART 🛒</button>
+            <button onclick="loadProfile()">PROFILE</button>
+            <button id="devTab" onclick="loadDevelopers()">DEVELOPERS</button>
+            <input type="text" id="searchInput" placeholder="Search games..." oninput="searchGames()" style="background:#222; color:white; border:none; padding:10px; border-radius:4px;">
+        </div>
+
+        <!-- MANAGER TOOLS -->
+        <div id="adminPanel" class="hidden admin-panel">
+            <h3 style="margin-top:0; color:var(--steam-light-blue)">MANAGER TOOLS</h3>
+            <select id="typeSelect" onchange="toggleAdminForm()">
+                <option value="dev">Add Publisher (Developer)</option>
+                <option value="game">Publish New Game</option>
+            </select>
+            
+            <div id="devInputs">
+                <input type="text" id="addDevName" placeholder="Publisher Name">
+                <input type="text" id="addDevCountry" placeholder="Country">
+                <input type="number" id="addDevYear" placeholder="Year Founded">
+                <button onclick="addPublisher()" class="btn-buy">SAVE PUBLISHER</button>
+            </div>
+            
+            <div id="gameInputs" class="hidden">
+                <input type="text" id="addGameTitle" placeholder="Game Title">
+                <input type="text" id="addGameGenre" placeholder="Genres (Action, RPG)">
+                <input type="number" id="addGamePrice" placeholder="Price ($)">
+                <input type="number" id="addGameYear" placeholder="Release Year">
+                <textarea id="addGameDesc" placeholder="Game Description (About the game...)" rows="3"></textarea>
+                <select id="devSelect"><option>Loading Publishers...</option></select>
+                <button onclick="publishGame()" class="btn-buy">PUBLISH TO STORE</button>
+            </div>
+        </div>
+
+        <div id="contentTitle"></div>
+        <div id="grid" class="game-grid"></div>
+    </div>
+
+    <!-- DETAIL VIEW -->
+    <div id="detailSection" class="hidden">
+        <div id="detailContent"></div>
+    </div>
+</div>
+
+<script>
+    const token = () => localStorage.getItem('token');
+    const role = () => localStorage.getItem('role');
+
+    function toggleAuth(s) {
+        document.getElementById('loginForm').classList.toggle('hidden', s);
+        document.getElementById('registerForm').classList.toggle('hidden', !s);
+    }
+
+    async function updateHeader() {
+        const r = await fetch('/api/auth/me', { headers: {'Authorization': 'Bearer '+token()} });
+        const u = await r.json();
+        document.getElementById('walletBal').innerText = `$${(u.balance || 0).toFixed(2)}`;
+        document.getElementById('userEmailDisplay').innerText = u.email;
+    }
+
+    function showMainPage() {
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('mainSection').classList.remove('hidden');
+        document.getElementById('detailSection').classList.add('hidden');
+        document.getElementById('userControls').classList.remove('hidden');
+        if (role() === 'admin') document.getElementById('adminPanel').classList.remove('hidden');
+        else document.getElementById('devTab').classList.add('hidden');
+        updateHeader(); loadStore();
+    }
+
+    async function handleLogin() {
+        const r = await fetch('/api/auth/login', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email: loginEmail.value, password: loginPassword.value })
+        });
+        const d = await r.json();
+        if(r.ok) { localStorage.setItem('token', d.token); localStorage.setItem('role', d.role); localStorage.setItem('email', loginEmail.value); showMainPage(); }
+        else alert(d.error);
+    }
+
+    async function handleRegister() {
+        const r = await fetch('/api/auth/register', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email: regEmail.value, password: regPassword.value })
+        });
+        const d = await r.json(); alert(d.message || d.error);
+        if(r.ok) toggleAuth(false);
+    }
+
+    async function loadStore(g = null, s = null) {
+        let url = `/games?${g ? 'genre='+g : ''}${s ? '&search='+s : ''}`;
+        const games = await (await fetch(url)).json();
+        document.getElementById('contentTitle').innerHTML = "<h2>Steam Store Catalogue</h2>";
+        document.getElementById('grid').innerHTML = games.map(item => `
+            <div class="game-card">
+                <h3 style="margin:0">${item.title}</h3>
+                <div style="margin:10px 0;">${(item.genres || []).map(gn => `<span class="genre-badge">${gn}</span>`).join('')}</div>
+                <div class="price-tag">$${item.price}</div>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-buy" onclick="purchase('${item._id}')" style="font-size:12px; padding:5px 10px;">BUY</button>
+                    <button onclick="addToCart('${item._id}')">🛒</button>
+                    <button onclick="viewGame('${item._id}')">INFO</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function viewGame(id) {
+        const r = await fetch(`/games/${id}`);
+        const gData = await r.json();
+        document.getElementById('mainSection').classList.add('hidden');
+        document.getElementById('detailSection').classList.remove('hidden');
+        document.getElementById('detailContent').innerHTML = `
+            <div class="detail-view">
+                <h1>${gData.title}</h1>
+                <p style="color:#bbb; line-height:1.6; font-size:1.1em;">${gData.description || 'No description provided.'}</p>
+                <div class="price-tag" style="font-size:2.5em;">$${gData.price}</div>
+                <div style="background:rgba(0,0,0,0.3); padding:20px; border-left:4px solid var(--steam-light-blue); margin: 20px 0;">
+                    <h4 style="margin:0; color:var(--steam-light-blue)">PUBLISHER INFORMATION</h4>
+                    <p style="margin:5px 0;">Developed by: <strong>${gData.developer?.name || 'Independent'}</strong></p>
+                    <p style="margin:5px 0; color:#888; font-size:12px;">Country: ${gData.developer?.country || 'N/A'} | Active since: ${gData.developer?.foundedYear || 'N/A'}</p>
+                </div>
+                <button class="btn-buy" onclick="purchase('${gData._id}')">PURCHASE NOW</button>
+                <button onclick="showMainPage()" style="background:none; border:1px solid #444; margin-left:10px;">BACK TO STORE</button>
+            </div>`;
+    }
+
+    async function addToCart(gameId) {
+        await fetch('/api/auth/cart', {
+            method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer '+token()},
+            body: JSON.stringify({ gameId })
+        });
+        alert("Added to cart!");
+    }
+
+    async function loadCart() {
+        const res = await fetch('/api/auth/me', { headers: {'Authorization': 'Bearer '+token()} });
+        const u = await res.json();
+        document.getElementById('contentTitle').innerHTML = "<h2>Shopping Cart 🛒</h2>";
+        document.getElementById('grid').innerHTML = u.cart.map(g => `
+            <div class="game-card">
+                <h3>${g.title}</h3>
+                <div class="price-tag">$${g.price}</div>
+                <button class="btn-buy" onclick="purchase('${g._id}')">CHECKOUT</button>
+            </div>
+        `).join('');
+    }
+
+    async function purchase(gameId) {
+        const res = await fetch('/api/auth/purchase', {
+            method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer '+token()},
+            body: JSON.stringify({ gameId })
+        });
+        const d = await res.json(); alert(d.message || d.error); updateHeader();
+    }
+
+    async function loadLibrary() {
+        const r = await fetch('/api/auth/library', { headers: {'Authorization': 'Bearer '+token()} });
+        const items = await r.json();
+        document.getElementById('contentTitle').innerHTML = "<h2>My Library</h2>";
+        document.getElementById('grid').innerHTML = items.filter(i => i.game).map(i => `
+            <div class="game-card" style="border-left:5px solid var(--steam-green)">
+                <h3>${i.game.title}</h3>
+                <p style="color:#888; font-size:12px;">Played: ${i.hoursPlayed} hours</p>
+                <button class="btn-buy" onclick="playGame('${i.game._id}')">PLAY NOW</button>
+            </div>
+        `).join('');
+    }
+
+    async function playGame(gameId) {
+        await fetch('/api/auth/play', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer '+token()}, body: JSON.stringify({ gameId }) });
+        loadLibrary();
+    }
+
+    async function loadProfile() {
+        const r = await fetch('/api/auth/me', { headers: {'Authorization': 'Bearer '+token()} });
+        const u = await r.json();
+        document.getElementById('contentTitle').innerHTML = "<h2>User Profile</h2>";
+        document.getElementById('grid').innerHTML = `
+            <div class="profile-card" style="grid-column: 1 / -1; display:flex; gap:30px;">
+                <img src="https://i.pravatar.cc/120" style="border:2px solid var(--steam-light-blue); border-radius:4px;">
+                <div>
+                    <h1 style="margin:0">${u.email}</h1>
+                    <p style="color:var(--steam-green)">Status: Online</p>
+                    <div style="background:#222; padding:20px; border-radius:4px; margin-top:15px;">
+                        <h4 style="margin:0">STEAM WALLET</h4>
+                        <p>Balance: <strong style="color:var(--steam-green)">$${u.balance.toFixed(2)}</strong></p>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="cardInp" placeholder="16-digit Card Number" maxlength="16" style="width:250px; background:#333; color:white; border:1px solid #000; padding:10px;">
+                            <input type="number" id="amtInp" placeholder="Sum" style="width:80px; background:#333; color:white; border:1px solid #000; padding:10px;">
+                            <button onclick="deposit()" class="btn-buy">DEPOSIT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    async function deposit() {
+        const r = await fetch('/api/auth/funds', {
+            method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer '+token()},
+            body: JSON.stringify({ amount: amtInp.value, cardNumber: cardInp.value })
+        });
+        const d = await r.json(); alert(d.message || d.error); loadProfile(); updateHeader();
+    }
+
+    function searchGames() { loadStore(null, searchInput.value); }
+    function logout() { localStorage.clear(); location.reload(); }
+    
+    function toggleAdminForm() {
+        const isG = typeSelect.value === 'game';
+        devInputs.classList.toggle('hidden', isG);
+        gameInputs.classList.toggle('hidden', !isG);
+        if(isG) fetch('/developers').then(r => r.json()).then(d => {
+            devSelect.innerHTML = d.map(i => `<option value="${i._id}">${i.name}</option>`).join('');
+        });
+    }
+
+    async function addPublisher() {
+        const res = await fetch('/developers', {
+            method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer '+token()},
+            body: JSON.stringify({ name: addDevName.value, country: addDevCountry.value, foundedYear: addDevYear.value })
+        });
+        if(res.ok) { alert('Publisher saved!'); addDevName.value=''; addDevCountry.value=''; addDevYear.value=''; }
+    }
+
+    async function publishGame() {
+        const res = await fetch('/games', {
+            method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer '+token()},
+            body: JSON.stringify({ 
+                title: addGameTitle.value, genres: addGameGenre.value, price: addGamePrice.value, 
+                releaseYear: addGameYear.value, description: addGameDesc.value, developer: devSelect.value 
+            })
+        });
+        if(res.ok) { alert('Game Published!'); loadStore(); }
+        else alert((await res.json()).error);
+    }
+
+    async function loadDevelopers() {
+        const d = await (await fetch('/developers')).json();
+        document.getElementById('contentTitle').innerHTML = "<h2>Publishers List</h2>";
+        document.getElementById('grid').innerHTML = d.map(i => `<div class="game-card"><h3>${i.name}</h3><p>${i.country} | Since ${i.foundedYear}</p></div>`).join('');
+    }
+
+    if (token()) showMainPage();
+</script>
+</body>
+</html>
