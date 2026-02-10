@@ -24,7 +24,6 @@ exports.create = async (req, res) => {
     try {
         const { title, genres, releaseYear, price, developer, description } = req.body;
 
-        // Превращаем строку "Action, Shooter" в массив ["Action", "Shooter"]
         const genresArray = (typeof genres === 'string') 
             ? genres.split(',').map(g => g.trim()).filter(g => g !== "")
             : genres;
@@ -50,4 +49,5 @@ exports.delete = async (req, res) => {
         await Game.findByIdAndDelete(req.params.id);
         res.json({ message: "Game deleted" });
     } catch (err) { res.status(400).json({ error: err.message }); }
+
 };
