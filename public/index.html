@@ -16,18 +16,15 @@
         .container { max-width: 1000px; margin: 20px auto; padding: 20px; }
         .hidden { display: none !important; }
         
-        /* Кнопки */
         button { background: #2a475e; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 2px; transition: 0.2s; }
         button:hover { background: var(--steam-light-blue); color: black; }
         .btn-buy { background: var(--steam-green); font-weight: bold; }
         
-        /* Сетка игр */
         .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .game-card { background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 15px; border-radius: 4px; position: relative; }
         .price-tag { color: var(--steam-light-blue); font-size: 1.2em; font-weight: bold; margin: 10px 0; }
         .genre-badge { background: rgba(103,193,245,0.1); color:#66c0f4; padding:2px 6px; border-radius:2px; font-size:10px; margin-right:4px; border:1px solid #66c0f4; text-transform: uppercase; }
 
-        /* Админка (исправленная) */
         .admin-panel { background: #222; padding: 20px; border: 1px dashed #555; margin-bottom: 30px; }
         .admin-panel input, .admin-panel select, .admin-panel textarea { 
             display: block; width: 100%; margin-bottom: 10px; background: #32353c; border: 1px solid #000; color: white; padding: 10px; box-sizing: border-box; 
@@ -36,7 +33,6 @@
         .nav-tabs { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .wallet-display { background: var(--steam-green); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
         
-        /* Профиль и Детали */
         .profile-card { background: var(--steam-dark); padding: 30px; border-radius: 4px; border: 1px solid #333; }
         .detail-view { background: #1b2838; padding: 40px; border: 1px solid var(--steam-light-blue); }
     </style>
@@ -320,4 +316,5 @@
     if (token()) showMainPage();
 </script>
 </body>
+
 </html>
