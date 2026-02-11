@@ -53,7 +53,7 @@ The project maintains complex relationships in MongoDB:
 5. **URL:** Open `http://localhost:3000`
 
 ## 7. Live URL
-**Live App:** [Your Render Link Here]
+**Live App:** `https://aitu-steam.onrender.com`
 
 ## 8. Postman Collection
 The root folder contains `postman_collection.json` which includes tests for:
